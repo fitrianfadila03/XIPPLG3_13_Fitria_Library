@@ -7,89 +7,111 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-    public function index() 
+    public function index()
     {
-        $categories= Category::all();
-  
+        $reviews = Reviews::all();
+
         return response()->json([
             'status' => 200,
-            'message' => 'Categories retrieved seccessfully.',
-            'data' => $categories
+            'message' => 'Reviews retrieved successfully.',
+            'data' => $reviews
         ], 200);
     }
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        
+        // $request->validate([
+        //     'book_id' => 'required|integer',
+        //     'user_id' => 'required|integer',
+        //     'rating' => 'required|integer|min:1|max:5',
+        //     'comment' => 'nullable|string',
+        // ]);
 
-        $category = Category::create($request->all());
-  
-        return response()->json([
-          'status' => 201,
-          'message' => 'Category created succesfully.',
-          'data' => $category
-        ], 201);
+        
+        $review = Reviews::create($request->all());
+
+        try {
+            // Store your data logic here
+            return response()->json([
+                'status' => 201,
+                'message' => 'Review created successfully.',
+                'data' => $review
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Error storing API data: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+        
+        
     }
 
     public function show($id)
     {
-        $category = Category::find($id);
+        $review = Reviews::find($id);
 
-        if (!$category) {
+        if (!$review) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Category not found.',
+                'message' => 'Review not found.',
                 'data' => null
             ], 404);
         }
 
         return response()->json([
             'status' => 200,
-            'message' => 'Category retrieved succesfully.',
-            'data' => $category
+            'message' => 'Review retrieved successfully.',
+            'data' => $review
         ], 200);
     }
 
+
     public function update(Request $request, $id)
     {
-        $category = Category::find($id);
+        $review = Reviews::find($id);
 
-        if (!$category) {
+        if (!$review) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Category not found.',
+                'message' => 'Review not found.',
                 'data' => null
             ], 404);
         }
 
-        $request->validate(['name' => 'string|max:255']);
-        $request->update($request->all());
+        // $request->validate([
+        //     'book_id' => 'integer',
+        //     'user_id' => 'integer',
+        //     'rating' => 'integer|min:1|max:5',
+        //     'comment' => 'nullable|string',
+        // ]);
+
+        $review->update($request->all());
 
         return response()->json([
             'status' => 200,
-            'message' => 'Category retrieved succesfully.',
-            'data' => $category
+            'message' => 'Review updated successfully.',
+            'data' => $review
         ], 200);
     }
 
     public function destroy($id)
     {
-        $category = Category::find($id);
+        $review = Reviews::find($id);
 
-        if (!$category) {
+        if (!$review) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Category not found.',
-                'data' => null
+                'message' => 'Review not found.',
+                'data' => $review
             ], 404);
         }
 
-        $category->delete();
+        $review->delete();
 
         return response()->json([
             'status' => 200,
-            'message' => 'Category retrieved succesfully.',
-            'data' => $category
+            'message' => 'Review deleted successfully.',
+            'data' => null
         ], 200);
     }
 }
