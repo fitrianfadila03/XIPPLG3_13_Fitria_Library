@@ -2,76 +2,84 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
 use Illuminate\Http\Request;
+use App\Models\Book;
 
 class BookController extends Controller
 {
-    // Menyimpan buku baru
-    public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'writer' => 'required|string|max:255',
-        'user_id' => 'required|exists:users,id',
-        'category_id' => 'required|exists:categories,id',
-        'publisher' => 'required|string|max:255',
-        'year' => 'required|integer|min:1900|max:'.date('Y'),
-    ]);
-
-    return response()->json($validated, 200); // Tambahkan response untuk debugging
-}
-
-    // Menampilkan semua buku
+    // Menampilkan semua data buku
     public function index()
     {
-        $books = Book::with(['user', 'category'])->get();
-        return response()->json($books, 200);
+        $books = Book::all();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Books retrieved successfully.',
+            'data' => $books,
+        ], 200);
     }
 
-    // Menampilkan buku berdasarkan ID
-    public function show($id)
+    // Menyimpan data buku baru
+    public function store(Request $request)
     {
-        $book = Book::with(['user', 'category'])->findOrFail($id);
-        return response()->json($book, 200);
-    }
-
-    // Memperbarui buku
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'title' => 'sometimes|string|max:255|unique:books,title,' . $id,
-            'writer' => 'sometimes|string|max:255',
-            'user_id' => 'sometimes|exists:users,id',
-            'category_id' => 'sometimes|exists:categories,id',
-            'publisher' => 'sometimes|string|max:255',
-            'year' => 'sometimes|integer|min:1000|max:9999',
+        $validatedData = $request->validate([
+            'title'       => 'required|string|max:255',
+            'writer'      => 'required|string|max:255',
+            'user_id'     => 'required|integer',
+            'category_id' => 'required|integer',
+            'publisher'   => 'required|string|max:255',
+            'year'        => 'required|integer',
         ]);
 
-        try {
-            $book = Book::findOrFail($id);
-            $book->update($request->all());
+        $book = Book::create($validatedData);
 
-            return response()->json([
-                'message' => 'Buku berhasil diperbarui.',
-                'book' => $book,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Pembaruan buku gagal', 'error' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'status' => 201,
+            'message' => 'Book created successfully.',
+            'data' => $book,
+        ], 201);
     }
 
-    // Menghapus buku
-    public function destroy($id)
+    // Menampilkan satu data buku berdasarkan ID
+    public function show(Book $book) // ✅ Model Binding
     {
-        $book = Book::find($id);
-        
-        if (!$book) {
-            return response()->json(['message' => 'Buku tidak ditemukan'], 404);
-        }
-        
+        return response()->json([
+            'status' => 200,
+            'message' => 'Book retrieved successfully.',
+            'data' => $book,
+        ], 200);
+    }
+
+    // Mengupdate data buku berdasarkan ID
+    public function update(Request $request, Book $book)
+    {
+        $validatedData = $request->validate([
+            'title'       => 'sometimes|required|string|max:255',
+            'writer'      => 'sometimes|required|string|max:255',
+            'user_id'     => 'sometimes|required|integer',
+            'category_id' => 'sometimes|required|integer',
+            'publisher'   => 'sometimes|required|string|max:255',
+            'year'        => 'sometimes|required|integer',
+        ]);
+
+        // Update data dalam model
+        $book ->update($validatedData);
+
+        return response()->json([
+            'message' => 'Book updated successfully',
+            'book'    => $book
+        ]);
+    }
+
+    // Menghapus data buku berdasarkan ID
+    public function destroy(Book $book) // ✅ Model Binding
+    {
         $book->delete();
-    
-        return response()->json(['message' => 'Buku berhasil dihapus'], 200);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Book deleted successfully.',
+            'data' => null,
+        ], 200);
     }
 }

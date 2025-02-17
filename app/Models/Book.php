@@ -15,18 +15,26 @@ class Book extends Model
         'user_id',
         'category_id',
         'publisher',
-        'year',
+        'year'
     ];
 
-    // Relasi dengan model User
     public function user()
     {
-        return $this->belongsTo(User2::class);
+        return $this->belongsTo(User::class);
     }
 
-    // Relasi dengan model Category
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function loans()
+    {
+        return $this->hasMany(loans::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }
