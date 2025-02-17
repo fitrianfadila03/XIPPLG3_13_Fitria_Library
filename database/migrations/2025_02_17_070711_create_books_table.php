@@ -16,8 +16,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('writer');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->on('users');
+            $table->foreignId('category_id')->on('categories');
             $table->string('publisher');
             $table->integer('year');
             $table->timestamps();

@@ -9,27 +9,18 @@ class BookController extends Controller
 {
     // Menyimpan buku baru
     public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255|unique:books',
-            'writer' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
-            'publisher' => 'required|string|max:255',
-            'year' => 'required|integer|min:1000|max:9999',
-        ]);
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'writer' => 'required|string|max:255',
+        'user_id' => 'required|exists:users,id',
+        'category_id' => 'required|exists:categories,id',
+        'publisher' => 'required|string|max:255',
+        'year' => 'required|integer|min:1900|max:'.date('Y'),
+    ]);
 
-        try {
-            $book = Book::create($request->all());
-
-            return response()->json([
-                'message' => 'Buku berhasil dibuat.',
-                'book' => $book,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Pembuatan buku gagal', 'error' => $e->getMessage()], 500);
-        }
-    }
+    return response()->json($validated, 200); // Tambahkan response untuk debugging
+}
 
     // Menampilkan semua buku
     public function index()
